@@ -2779,16 +2779,14 @@ window.addEventListener("message", (event) => {
   if (event.source !== window) return;
   if (!event.data || event.data.type !== "lovableTokenFound") return;
 
+  const token = String(event.data.token || "").replace(/^Bearer\s+/i, "").trim();
+  const projectIdFromEvent = event.data.projectId || null;
   const currentProjectMatch = location.pathname.match(/projects\/([0-9a-fA-F-]{36})/i);
   const currentProjectId = currentProjectMatch ? currentProjectMatch[1] : null;
+  const projectId = projectIdFromEvent || currentProjectId;
 
-  const token = String(event.data.token || "").replace(/^Bearer\s+/i, "").trim();
-  const projectId = event.data.projectId || currentProjectId;
-
-  if (!currentProjectId || !token || !projectId || projectId !== currentProjectId) {
-    chrome.storage.local.remove(["lovable_token", "lovable_projectId"]);
-    return;
-  }
+  if (!token || !projectId) return;
+  if (currentProjectId && projectId !== currentProjectId) return;
 
   chrome.storage.local.set({
     lovable_token: token,
