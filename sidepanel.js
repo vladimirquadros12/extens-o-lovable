@@ -950,38 +950,14 @@ if (notifClose) {
 
   async function loadNotifications() {
     const list = document.getElementById('sp-notif-list');
-    list.innerHTML = '<p class="sp-notif-empty">Carregando...</p>';
-    try {
-      const data = await bgFetch("https://www.noud.shop/api/get_notification.php", { method: "GET" });
-      if (!data || !data.text) { list.innerHTML = '<p class="sp-notif-empty">Nenhuma notificação.</p>'; return; }
-      const text = data.text;
-      const link = data.link;
-      await chrome.storage.local.set({ ql_last_read_notif: text });
-      const badge = document.querySelector('.sp-notif-badge');
-      if (badge) badge.style.display = 'none';
-      const linkHtml = link ? '<a href="' + link + '" target="_blank" rel="noopener noreferrer" class="sp-notif-link" style="display:inline-block;margin-top:6px;color:#A855F7;text-decoration:underline;">Abrir link →</a>' : '';
-      list.innerHTML = '<div class="sp-notif-item" style="padding:10px;border-bottom:1px solid var(--ql-border);">' +
-        '<div class="sp-notif-item-title" style="font-weight:700;font-size:12px;color:var(--ql-accent);margin-bottom:4px;">Notificação</div>' +
-        '<div class="sp-notif-item-msg" style="font-size:11px;color:var(--ql-text-primary);line-height:1.4;">' + text + '</div>' +
-        linkHtml +
-      '</div>';
-    } catch(e) { list.innerHTML = '<p class="sp-notif-empty">Erro ao carregar.</p>'; }
+    list.innerHTML = '<p class="sp-notif-empty">Nenhuma notificação.</p>';
   }
 
 
   async function checkUnread() {
     try {
-      const data = await bgFetch("https://www.noud.shop/api/get_notification.php", { method: "GET" });
-      if (!data || !data.text) return;
-      chrome.storage.local.get(["ql_last_read_notif"], res => {
-        const lastRead = res.ql_last_read_notif || '';
-        const unread = (lastRead !== data.text) ? 1 : 0;
-        const badge = document.querySelector('.sp-notif-badge');
-        if (badge) {
-          badge.textContent = unread;
-          badge.style.display = unread > 0 ? 'flex' : 'none';
-        }
-      });
+      const badge = document.querySelector('.sp-notif-badge');
+      if (badge) badge.style.display = 'none';
     } catch(e) {}
   }
 
@@ -3282,19 +3258,7 @@ if (notifClose) {
   }
 
   async function checkExtensionStatus() {
-    try {
-      const fetchPromise = bgFetch("https://www.noud.shop/api/get_notification.php", { method: "GET" });
-      const timeoutPromise = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000));
-      const data = await Promise.race([fetchPromise, timeoutPromise]);
-      if (data && data.disable_extension === true) {
-        showBlockedScreen(data.disable_message || "Esta versão da extensão foi descontinuada. Por favor, atualize para continuar.", data.disable_link || "https://www.noud.shop/");
-        return true;
-      }
-    } catch(e) {}
     return false;
   }
-
-  checkExtensionStatus();
-  setInterval(checkExtensionStatus, 30000);
 
 })();

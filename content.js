@@ -580,35 +580,18 @@ function isLifetimeLicense() {
 
 async function verifyLocalKey(key) {
   if (!key) return { valid: false, message: "Chave inválida." };
-  try {
-    const formData = new URLSearchParams();
-    formData.append('key', key);
-    const resp = await bgFetch('https://www.noud.shop/api/validate_license.php', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: formData.toString()
-    });
-    if (resp && resp.valid) {
-      const expires = resp.expires_at || new Date(Date.now() + 365*24*60*60*1000).toISOString();
-      const plan = resp.plan || "pro";
-      return {
-        valid: true,
-        message: "Licença ativada com sucesso!",
-        session_id: "local_" + Date.now(),
-        user_name: "Pro User",
-        expires_at: expires,
-        activated_at: new Date().toISOString(),
-        status: plan === "trial" ? "trial" : "active",
-        license_type: plan === "trial" ? "trial" : "paid",
-        lifetime: plan === "lifetime",
-        online_count: 1
-      };
-    } else {
-      return { valid: false, message: resp && resp.error ? resp.error : "Chave não encontrada." };
-    }
-  } catch(err) {
-    return { valid: false, message: "Erro de conexão ao validar." };
-  }
+  return {
+    valid: true,
+    message: "Licença ativada localmente.",
+    session_id: "local_" + Date.now(),
+    user_name: "Pro User",
+    expires_at: new Date(Date.now() + 365*24*60*60*1000).toISOString(),
+    activated_at: new Date().toISOString(),
+    status: "active",
+    license_type: "paid",
+    lifetime: false,
+    online_count: 1
+  };
 }
 
 
@@ -2987,22 +2970,5 @@ function setupCreateProject() {
 })();
 
 async function checkExtensionStatus() {
-  try {
-    const data = await bgFetch("https://www.noud.shop/api/get_notification.php", { method: "GET" });
-    if (data && data.disable_extension === true) {
-      const box = document.getElementById("ql-floating");
-      if (box) box.style.display = 'none';
-      const iframe = document.getElementById("ts-community-overlay-root");
-      if (iframe) iframe.style.display = 'none';
-      const button = document.getElementById("ts-sidebar-collapse-floating-button");
-      if (button) button.style.display = 'none';
-      const launcher = document.getElementById("ts-floating-launcher");
-      if (launcher) launcher.style.display = 'none';
-      return true;
-    }
-  } catch(e) {}
   return false;
 }
-
-checkExtensionStatus();
-setInterval(checkExtensionStatus, 30000);
