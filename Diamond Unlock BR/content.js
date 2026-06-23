@@ -2425,8 +2425,6 @@ async function handleFilesAttach(files) {
 }
 
 // ===== DOWNLOAD ALL PROJECT FILES (Popup) =====
-var VERSIONS_URL_POPUP = SUPABASE_URL + "/rest/v1/extension_versions?select=version,changelog,file_path,is_alert_active&order=created_at.desc&limit=1&is_alert_active=eq.true";
-var USER_ROLES_URL_POPUP = SUPABASE_URL + "/rest/v1/user_roles?select=role";
 var CURRENT_EXT_VERSION_POPUP = "4.3";
 
 function setupDownloadProject() {
